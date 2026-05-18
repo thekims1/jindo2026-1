@@ -7,17 +7,9 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;padding:1.5rem;color:#1a1a1a}
-.header-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
-h1{font-size:18px;font-weight:500;color:#1a1a1a}
-.sync-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:12px;background:#f0f0ee;color:#888;border:0.5px solid #ddd}
-.sync-badge.synced{background:#e8f5e9;color:#2e7d32;border-color:#c8e6c9}
-.sync-badge.syncing{background:#fff8e1;color:#e65100;border-color:#ffe082}
-.sync-badge.error{background:#fce4ec;color:#c62828;border-color:#f48fb1}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
-.setup-notice{background:#fff8e1;border:0.5px solid #ffe082;border-radius:10px;padding:12px 16px;margin-bottom:1rem;font-size:13px;line-height:1.7}
-.setup-notice strong{display:block;margin-bottom:2px}
-.setup-notice code{background:#f5f5f3;padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12px}
-.top-bar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+h1{font-size:18px;font-weight:500;margin-bottom:0.5rem;color:#1a1a1a;display:flex;align-items:center;gap:10px}
+#sync-badge{font-size:11px;font-weight:400;padding:2px 8px;border-radius:20px;background:#e8f0fb;color:#1a5fb4}
+.top-bar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap;margin-top:0.75rem}
 .top-bar button{font-size:13px;padding:4px 14px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer;height:32px}
 .top-bar button:hover{background:#f0f0ee}
 .legend{display:flex;gap:12px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
@@ -25,50 +17,33 @@ h1{font-size:18px;font-weight:500;color:#1a1a1a}
 .legend-dot{width:14px;height:14px;border-radius:3px}
 .tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:0.5px solid #ddd;padding:1rem}
 table{border-collapse:collapse;font-size:13px}
-th,td{border:0.5px solid #ddd;padding:6px 8px;white-space:nowrap}
-th{background:#f5f5f3;color:#666;font-weight:500;text-align:center;vertical-align:top}
+th,td{border:0.5px solid #ddd;white-space:nowrap}
+th{background:#f5f5f3;color:#666;font-weight:500;text-align:center;vertical-align:top;padding:6px 8px}
 th.topic-input-cell{padding:4px}
 th.topic-input-cell input{width:72px;font-size:11px;padding:3px 5px;border:0.5px solid #ddd;border-radius:4px;background:#fff;color:#1a1a1a;text-align:center}
 th.seq-label{font-size:12px;font-weight:500;display:block;margin-bottom:3px}
-td.class-name{background:#f5f5f3;font-weight:500;color:#1a1a1a;text-align:left;min-width:120px;font-size:12px}
-td.cell{text-align:center;cursor:pointer;min-width:72px;color:#1a1a1a;font-size:12px}
-td.cell:hover{filter:brightness(0.95)}
-td.done{background:#B5D4F4;color:#0C447C}
-td.perf{background:#FAC775;color:#633806}
+td.class-name{background:#f5f5f3;font-weight:500;color:#1a1a1a;text-align:left;min-width:120px;font-size:12px;padding:6px 8px}
+td.cell{text-align:center;cursor:pointer;min-width:80px;color:#1a1a1a;font-size:12px;padding:0;vertical-align:middle}
+td.done{background:#B5D4F4}
+td.perf{background:#FAC775}
 td.done.perf{background:linear-gradient(135deg,#B5D4F4 50%,#FAC775 50%)}
-td.empty{color:#bbb}
-.modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:100;align-items:center;justify-content:center}
-.modal-bg.open{display:flex}
-.modal{background:#fff;border:0.5px solid #ccc;border-radius:12px;padding:1.25rem;width:260px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
-.modal h3{font-size:14px;font-weight:500;margin-bottom:12px}
-.modal label{font-size:12px;color:#666;display:block;margin-bottom:4px}
-.modal input[type=text]{width:100%;font-size:13px;padding:6px 8px;border:0.5px solid #ccc;border-radius:8px;margin-bottom:10px}
-.modal-checks{display:flex;gap:12px;margin-bottom:12px}
-.modal-checks label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;font-weight:400}
-.modal-btns{display:flex;gap:8px;justify-content:flex-end}
-.modal-btns button{font-size:13px;padding:5px 14px;border:0.5px solid #ccc;border-radius:8px;background:#fff;cursor:pointer}
-.modal-btns button.primary{background:#e8f0fb;color:#1a5fb4;border-color:transparent}
-.modal-btns button:hover{background:#f0f0ee}
-.modal-btns button.primary:hover{filter:brightness(0.95)}
+.cell-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 4px 3px;gap:3px;min-height:38px}
+.cell-date{font-size:12px;color:#1a1a1a;min-height:16px}
+td.done .cell-date{color:#0C447C}
+td.perf .cell-date{color:#633806}
+.cell-empty .cell-date{color:#bbb}
+.cell-btns{display:flex;gap:3px}
+.cbtn{width:16px;height:16px;border-radius:3px;border:0.5px solid rgba(0,0,0,0.15);cursor:pointer;flex-shrink:0;opacity:0.6}
+.cbtn:hover{opacity:1}
+.cbtn-blue{background:#B5D4F4}
+.cbtn-yellow{background:#FAC775}
+.cbtn.active{opacity:1;border-color:rgba(0,0,0,0.4);box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1)}
+.cell-input-wrap{display:flex;flex-direction:column;align-items:center;padding:3px 4px;gap:3px}
+.cell-inline-input{width:60px;font-size:12px;padding:2px 4px;border:0.5px solid #85B7EB;border-radius:4px;text-align:center;outline:none;background:#fff;color:#1a1a1a}
 </style>
 </head>
 <body>
-
-<div id="setup-notice" class="setup-notice" style="display:none">
-  <strong>Firebase 미설정 — 지금은 이 기기에만 저장됩니다</strong>
-  PC·폰 동기화를 하려면: <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a>에서 프로젝트를 만들고,
-  이 HTML 파일 상단 <code>FIREBASE_CONFIG</code>에 값을 채워 넣으세요.
-  <br><small style="color:#999">Firestore Database → 규칙에서 <code>allow read, write: if true;</code> 로 설정하세요 (개인 사용 기준).</small>
-</div>
-
-<div class="header-row">
-  <h1>진도계획표</h1>
-  <span class="sync-badge" id="sync-badge" style="display:none">
-    <span class="sync-dot"></span>
-    <span id="sync-text"></span>
-  </span>
-</div>
-
+<h1>진도계획표 <span id="sync-badge">연결 중...</span></h1>
 <div class="top-bar">
   <button id="btn-add">+ 차시 추가</button>
   <button id="btn-remove">− 마지막 차시 삭제</button>
@@ -76,173 +51,105 @@ td.empty{color:#bbb}
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:#B5D4F4;border:0.5px solid #85B7EB"></div>수업 완료</div>
   <div class="legend-item"><div class="legend-dot" style="background:#FAC775;border:0.5px solid #EF9F27"></div>수행평가</div>
-  <div class="legend-item" style="font-size:12px;color:#aaa">셀 클릭 → 날짜·상태 입력</div>
+  <div class="legend-item" style="font-size:12px;color:#aaa">셀 클릭 → 날짜 입력 · 파랑/노랑 버튼으로 색칠</div>
 </div>
 <div class="tbl-wrap"><table id="tbl"></table></div>
 
-<div class="modal-bg" id="modal">
-  <div class="modal">
-    <h3 id="modal-title">날짜 입력</h3>
-    <label>날짜 (예: 6/9)</label>
-    <input type="text" id="modal-date" placeholder="6/9" maxlength="10"/>
-    <div class="modal-checks">
-      <label><input type="checkbox" id="chk-done"> 수업 완료</label>
-      <label><input type="checkbox" id="chk-perf"> 수행평가</label>
-    </div>
-    <div class="modal-btns">
-      <button id="btn-clear">초기화</button>
-      <button id="btn-cancel">취소</button>
-      <button class="primary" id="btn-save">저장</button>
-    </div>
-  </div>
-</div>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-<!-- Firebase SDK (compat mode) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-<script>
-// ════════════════════════════════════════════════════════════
-//  Firebase 설정값 입력 (Firebase Console → 프로젝트 설정 → 앱 추가 → 웹)
-//  비워두면 로컬 전용 모드로 동작합니다.
-// ════════════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyBrFfj_6OYJoWO2Br_xNuYQdCsN0XFaLjg",
-  authDomain:        "jindo-2026-1.firebaseapp.com",
-  projectId:         "jindo-2026-1",
-  storageBucket:     "jindo-2026-1.firebasestorage.app",
+  apiKey: "AIzaSyBrFfj_6OYJoWO2Br_xNuYQdCsN0XFaLjg",
+  authDomain: "jindo-2026-1.firebaseapp.com",
+  projectId: "jindo-2026-1",
+  storageBucket: "jindo-2026-1.firebasestorage.app",
   messagingSenderId: "112802983410",
-  appId:             "1:112802983410:web:9ff33e868b6a446c094f6b",
-  measurementId:     "G-ZENF5WES5Y"
+  appId: "1:112802983410:web:9ff33e868b6a446c094f6b",
+  measurementId: "G-ZENF5WES5Y"
 };
-// ════════════════════════════════════════════════════════════
 
 const CLASSES = [
-  "경제2-4 월화금",
-  "경제2-5 화목금",
-  "정치",
-  "사탐3-2S 월목",
-  "사탐3-6T 수목",
-  "사탐3-9R 화수"
+  "경제2-4 월화금","경제2-5 화목금","정치",
+  "사탐3-2S 월목","사탐3-6T 수목","사탐3-9R 화수"
 ];
 
-const KEY_DATA   = 'jindo_cells_v2';
-const KEY_SEQ    = 'jindo_seq_v2';
-const KEY_TOPICS = 'jindo_topics_v2';
-const DOC_PATH   = 'jindo/state'; // Firestore: 컬렉션 "jindo" / 문서 "state"
+const app = initializeApp(FIREBASE_CONFIG);
+const db = getFirestore(app);
+const stateRef = doc(db, 'jindo', 'state');
 
-let cellData = {};
-let numSeq   = 10;
-let topics   = {};
-let db       = null;
+let state = { cellData:{}, numSeq:10, topics:{} };
+let editingKey = null;
 
-// 로컬 캐시에서 초기 로드 (오프라인에서도 즉시 표시)
-try { cellData = JSON.parse(localStorage.getItem(KEY_DATA))   || {}; } catch(e){}
-try { numSeq   = parseInt(localStorage.getItem(KEY_SEQ))      || 10; } catch(e){}
-try { topics   = JSON.parse(localStorage.getItem(KEY_TOPICS)) || {}; } catch(e){}
+const badge = document.getElementById('sync-badge');
 
-// ── 동기화 상태 UI ──
-function setSyncStatus(state) {
-  const badge = document.getElementById('sync-badge');
-  const text  = document.getElementById('sync-text');
-  badge.className = 'sync-badge ' + state;
-  badge.style.display = 'inline-flex';
-  const labels = { synced:'동기화됨', syncing:'동기화 중...', error:'연결 오류' };
-  text.textContent = labels[state] || state;
+function setSyncBadge(s) {
+  if(s==='ok'){badge.textContent='동기화됨';badge.style.background='#eafaf1';badge.style.color='#1a7c4a';}
+  else if(s==='saving'){badge.textContent='저장 중...';badge.style.background='#fef9e7';badge.style.color='#b7770d';}
+  else{badge.textContent='연결 오류';badge.style.background='#fdecea';badge.style.color='#c0392b';}
 }
 
-// ── localStorage 저장 ──
-function saveLocal() {
+async function persist() {
+  setSyncBadge('saving');
   try {
-    localStorage.setItem(KEY_DATA,   JSON.stringify(cellData));
-    localStorage.setItem(KEY_SEQ,    String(numSeq));
-    localStorage.setItem(KEY_TOPICS, JSON.stringify(topics));
-  } catch(e){}
+    await setDoc(stateRef, { cellData: state.cellData, numSeq: state.numSeq, topics: state.topics, updatedAt: new Date() });
+  } catch(e){ setSyncBadge('error'); }
 }
 
-// ── 통합 저장 (localStorage + Firestore) ──
-function persist() {
-  saveLocal();
-  if (!db) return;
-  setSyncStatus('syncing');
-  db.doc(DOC_PATH).set({
-    cellData,
-    numSeq,
-    topics,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  })
-  .then(()  => setSyncStatus('synced'))
-  .catch(()  => setSyncStatus('error'));
-}
+onSnapshot(stateRef, snap => {
+  if(snap.exists()) {
+    const d = snap.data();
+    state.cellData = d.cellData || {};
+    state.numSeq = d.numSeq || 10;
+    state.topics = d.topics || {};
+  }
+  setSyncBadge('ok');
+  render();
+}, () => setSyncBadge('error'));
 
-// ── Firebase 초기화 ──
-function isConfigured(cfg) {
-  return !!(cfg.apiKey && cfg.projectId);
-}
-
-if (isConfigured(FIREBASE_CONFIG)) {
-  firebase.initializeApp(FIREBASE_CONFIG);
-  db = firebase.firestore();
-  setSyncStatus('syncing');
-
-  db.doc(DOC_PATH).onSnapshot(snap => {
-    // 내 기기의 낙관적 로컬 쓰기는 건너뜀 (서버 확인 후에만 처리)
-    if (snap.metadata.hasPendingWrites) return;
-
-    if (!snap.exists) {
-      // 최초 실행: 로컬 데이터를 Firestore에 업로드
-      db.doc(DOC_PATH).set({
-        cellData, numSeq, topics,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      setSyncStatus('synced');
-      return;
-    }
-
-    // 원격 업데이트 수신 → 상태 반영
-    const data = snap.data();
-    cellData = data.cellData || {};
-    numSeq   = typeof data.numSeq === 'number' ? data.numSeq : 10;
-    topics   = data.topics || {};
-    saveLocal();
-    setSyncStatus('synced');
-
-    // 모달이 열려 있거나 표 내 input에 포커스 중이면 렌더 보류
-    const modalOpen    = document.getElementById('modal').classList.contains('open');
-    const inputFocused = document.activeElement && document.activeElement.closest('#tbl');
-    if (!modalOpen && !inputFocused) render();
-
-  }, err => {
-    console.error('Firestore 오류:', err);
-    setSyncStatus('error');
-  });
-} else {
-  document.getElementById('setup-notice').style.display = 'block';
-}
-
-// ── 렌더링 ──
-function cellKey(cls, idx) { return cls + '||' + idx; }
-
-let editing = null;
+function cellKey(cls, idx){ return cls+'||'+idx; }
 
 function render() {
   const tbl = document.getElementById('tbl');
   let html = '<thead><tr><th style="min-width:120px;text-align:left;vertical-align:middle">반</th>';
-  for (let i = 0; i < numSeq; i++) {
-    const safeVal = (topics[i] || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    html += `<th class="topic-input-cell"><span class="seq-label">${i+1}차시</span><input type="text" placeholder="주제" value="${safeVal}" data-seq="${i}" /></th>`;
+  for(let i=0;i<state.numSeq;i++){
+    const t = (state.topics[i]||'').replace(/"/g,'&quot;');
+    html += `<th class="topic-input-cell"><span class="seq-label">${i+1}차시</span><input type="text" placeholder="주제" value="${t}" data-seq="${i}"/></th>`;
   }
   html += '</tr></thead><tbody>';
   CLASSES.forEach(cls => {
     html += `<tr><td class="class-name">${cls}</td>`;
-    for (let i = 0; i < numSeq; i++) {
-      const k  = cellKey(cls, i);
-      const d  = cellData[k] || {};
-      let cls2 = 'cell';
-      if (d.done) cls2 += ' done';
-      if (d.perf) cls2 += ' perf';
-      if (!d.date && !d.done && !d.perf) cls2 += ' empty';
-      html += `<td class="${cls2}" data-key="${k}" data-cls="${cls}" data-idx="${i}">${d.date || '—'}</td>`;
+    for(let i=0;i<state.numSeq;i++){
+      const k = cellKey(cls,i);
+      const d = state.cellData[k]||{};
+      let tdCls='cell';
+      if(d.done) tdCls+=' done';
+      if(d.perf) tdCls+=' perf';
+      if(!d.date&&!d.done&&!d.perf) tdCls+=' cell-empty';
+      const dateVal = (d.date||'').replace(/"/g,'&quot;');
+      const blueCls = 'cbtn cbtn-blue'+(d.done?' active':'');
+      const yelCls  = 'cbtn cbtn-yellow'+(d.perf?' active':'');
+      if(editingKey===k){
+        html += `<td class="${tdCls}" data-key="${k}">
+          <div class="cell-input-wrap">
+            <input class="cell-inline-input" type="text" value="${dateVal}" placeholder="6/9" maxlength="10" data-key="${k}"/>
+            <div class="cell-btns">
+              <div class="${blueCls}" data-key="${k}" data-type="done"></div>
+              <div class="${yelCls}" data-key="${k}" data-type="perf"></div>
+            </div>
+          </div>
+        </td>`;
+      } else {
+        html += `<td class="${tdCls}" data-key="${k}">
+          <div class="cell-inner">
+            <span class="cell-date">${d.date||'—'}</span>
+            <div class="cell-btns">
+              <div class="${blueCls}" data-key="${k}" data-type="done"></div>
+              <div class="${yelCls}" data-key="${k}" data-type="perf"></div>
+            </div>
+          </div>
+        </td>`;
+      }
     }
     html += '</tr>';
   });
@@ -250,61 +157,66 @@ function render() {
   tbl.innerHTML = html;
 
   tbl.querySelectorAll('td.cell').forEach(td => {
-    td.addEventListener('click', () => openModal(td.dataset.cls, parseInt(td.dataset.idx), td.dataset.key));
+    td.addEventListener('click', e => {
+      if(e.target.classList.contains('cbtn')||e.target.classList.contains('cell-inline-input')) return;
+      const k = td.dataset.key;
+      if(editingKey===k) return;
+      editingKey = k;
+      render();
+      setTimeout(()=>{
+        const inp = tbl.querySelector(`.cell-inline-input[data-key="${CSS.escape(k)}"]`);
+        if(inp){ inp.focus(); inp.select(); }
+      },30);
+    });
   });
+
+  tbl.querySelectorAll('.cell-inline-input').forEach(inp => {
+    inp.addEventListener('keydown', e => {
+      if(e.key==='Enter'){
+        const k = inp.dataset.key;
+        if(!state.cellData[k]) state.cellData[k]={};
+        state.cellData[k].date = inp.value.trim();
+        editingKey = null;
+        persist(); render();
+      }
+      if(e.key==='Escape'){ editingKey=null; render(); }
+      e.stopPropagation();
+    });
+    inp.addEventListener('blur', () => {
+      setTimeout(()=>{
+        if(editingKey===inp.dataset.key){
+          const k = inp.dataset.key;
+          if(!state.cellData[k]) state.cellData[k]={};
+          state.cellData[k].date = inp.value.trim();
+          editingKey=null; persist(); render();
+        }
+      },150);
+    });
+    inp.addEventListener('click', e => e.stopPropagation());
+  });
+
+  tbl.querySelectorAll('.cbtn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const k = btn.dataset.key;
+      const type = btn.dataset.type;
+      if(!state.cellData[k]) state.cellData[k]={};
+      state.cellData[k][type] = !state.cellData[k][type];
+      persist(); render();
+    });
+  });
+
   tbl.querySelectorAll('input[data-seq]').forEach(inp => {
-    inp.addEventListener('change', () => { topics[inp.dataset.seq] = inp.value; persist(); });
+    inp.addEventListener('change', () => { state.topics[inp.dataset.seq]=inp.value; persist(); });
     inp.addEventListener('click', e => e.stopPropagation());
   });
 }
 
-function openModal(cls, idx, key) {
-  editing = key;
-  const d = cellData[key] || {};
-  document.getElementById('modal-title').textContent = `${cls} · ${idx+1}차시`;
-  document.getElementById('modal-date').value = d.date || '';
-  document.getElementById('chk-done').checked = !!d.done;
-  document.getElementById('chk-perf').checked = !!d.perf;
-  document.getElementById('modal').classList.add('open');
-  setTimeout(() => document.getElementById('modal-date').focus(), 50);
-}
-
-document.getElementById('btn-save').onclick = () => {
-  if (!editing) return;
-  cellData[editing] = {
-    date: document.getElementById('modal-date').value.trim(),
-    done: document.getElementById('chk-done').checked,
-    perf: document.getElementById('chk-perf').checked,
-  };
-  persist(); render();
-  document.getElementById('modal').classList.remove('open');
-  editing = null;
-};
-document.getElementById('btn-cancel').onclick = () => {
-  document.getElementById('modal').classList.remove('open');
-  editing = null;
-};
-document.getElementById('btn-clear').onclick = () => {
-  if (!editing) return;
-  delete cellData[editing];
-  persist(); render();
-  document.getElementById('modal').classList.remove('open');
-  editing = null;
-};
-document.getElementById('modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal')) {
-    document.getElementById('modal').classList.remove('open');
-    editing = null;
-  }
-});
-document.getElementById('btn-add').onclick    = () => { numSeq++; persist(); render(); };
+document.getElementById('btn-add').onclick = () => { state.numSeq++; persist(); render(); };
 document.getElementById('btn-remove').onclick = () => {
-  if (numSeq <= 1) return;
-  numSeq--;
-  persist(); render();
+  if(state.numSeq<=1) return;
+  state.numSeq--; persist(); render();
 };
-
-render();
 </script>
 </body>
 </html>
