@@ -7,19 +7,24 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;padding:1.5rem;color:#1a1a1a}
-h1{font-size:18px;font-weight:500;margin-bottom:0.5rem;color:#1a1a1a;display:flex;align-items:center;gap:10px}
+h1{font-size:18px;font-weight:500;margin-bottom:0.75rem;display:flex;align-items:center;gap:10px}
 #sync-badge{font-size:11px;font-weight:400;padding:2px 8px;border-radius:20px;background:#e8f0fb;color:#1a5fb4}
-.top-bar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap;margin-top:0.75rem}
+.tabs{display:flex;gap:4px;margin-bottom:0;border-bottom:0.5px solid #ddd;padding-bottom:0}
+.tab{font-size:13px;padding:6px 16px;border:0.5px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;cursor:pointer;color:#888;background:transparent;position:relative;top:1px}
+.tab:hover{color:#1a1a1a;background:#f0f0ee}
+.tab.active{background:#fff;color:#1a1a1a;border-color:#ddd;font-weight:500}
+.top-bar{display:flex;gap:8px;align-items:center;margin:1rem 0;flex-wrap:wrap}
 .top-bar button{font-size:13px;padding:4px 14px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer;height:32px}
 .top-bar button:hover{background:#f0f0ee}
 .legend{display:flex;gap:12px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
 .legend-dot{width:14px;height:14px;border-radius:3px}
-.tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:0.5px solid #ddd;padding:1rem}
+.tbl-wrap{overflow-x:auto;background:#fff;border-radius:0 12px 12px 12px;border:0.5px solid #ddd;padding:1rem}
 table{border-collapse:collapse;font-size:13px}
 th,td{border:0.5px solid #ddd;white-space:nowrap}
 th{background:#f5f5f3;color:#666;font-weight:500;text-align:center;vertical-align:top;padding:6px 8px}
-th.topic-input-cell{padding:4px}
+th.topic-input-cell{padding:4px;cursor:context-menu;user-select:none}
+th.topic-input-cell:hover{background:#eeede8}
 th.topic-input-cell input{width:72px;font-size:11px;padding:3px 5px;border:0.5px solid #ddd;border-radius:4px;background:#fff;color:#1a1a1a;text-align:center}
 th.seq-label{font-size:12px;font-weight:500;display:block;margin-bottom:3px}
 td.class-name{background:#f5f5f3;font-weight:500;color:#1a1a1a;text-align:left;min-width:120px;font-size:12px;padding:6px 8px}
@@ -37,23 +42,45 @@ td.perf .cell-date{color:#633806}
 .cbtn:hover{opacity:1}
 .cbtn-blue{background:#B5D4F4}
 .cbtn-yellow{background:#FAC775}
-.cbtn.active{opacity:1;border-color:rgba(0,0,0,0.4);box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1)}
+.cbtn.active{opacity:1;border-color:rgba(0,0,0,0.4)}
 .cell-input-wrap{display:flex;flex-direction:column;align-items:center;padding:3px 4px;gap:3px}
 .cell-inline-input{width:60px;font-size:12px;padding:2px 4px;border:0.5px solid #85B7EB;border-radius:4px;text-align:center;outline:none;background:#fff;color:#1a1a1a}
+#ctx-menu{position:fixed;background:#fff;border:0.5px solid #ccc;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:1000;min-width:160px;padding:4px 0;display:none}
+#ctx-menu .ctx-item{padding:7px 16px;font-size:13px;cursor:pointer;color:#1a1a1a;display:flex;align-items:center;gap:8px}
+#ctx-menu .ctx-item:hover{background:#f0f0ee}
+#ctx-menu .ctx-sep{height:0.5px;background:#eee;margin:3px 0}
+#ctx-menu .ctx-danger{color:#c0392b}
+#ctx-menu .ctx-danger:hover{background:#fdecea}
 </style>
 </head>
 <body>
 <h1>진도계획표 <span id="sync-badge">연결 중...</span></h1>
+
+<div class="tabs">
+  <div class="tab active" data-subject="경제">경제</div>
+  <div class="tab" data-subject="정치">정치</div>
+  <div class="tab" data-subject="사탐">사탐</div>
+</div>
+
 <div class="top-bar">
   <button id="btn-add">+ 차시 추가</button>
-  <button id="btn-remove">− 마지막 차시 삭제</button>
 </div>
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:#B5D4F4;border:0.5px solid #85B7EB"></div>수업 완료</div>
   <div class="legend-item"><div class="legend-dot" style="background:#FAC775;border:0.5px solid #EF9F27"></div>수행평가</div>
-  <div class="legend-item" style="font-size:12px;color:#aaa">셀 클릭 → 날짜 입력 · 파랑/노랑 버튼으로 색칠</div>
+  <div class="legend-item" style="font-size:12px;color:#aaa">셀 클릭→날짜 입력 · 차시 헤더 우클릭→열 편집</div>
 </div>
 <div class="tbl-wrap"><table id="tbl"></table></div>
+
+<div id="ctx-menu">
+  <div class="ctx-item" id="ctx-insert-before">← 이 열 앞에 삽입</div>
+  <div class="ctx-item" id="ctx-insert-after">→ 이 열 뒤에 삽입</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" id="ctx-move-left">◀ 왼쪽으로 이동</div>
+  <div class="ctx-item" id="ctx-move-right">오른쪽으로 이동 ▶</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item ctx-danger" id="ctx-delete">이 열 삭제</div>
+</div>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -69,19 +96,29 @@ const FIREBASE_CONFIG = {
   measurementId: "G-ZENF5WES5Y"
 };
 
-const CLASSES = [
-  "경제2-4 월화금","경제2-5 화목금","정치",
-  "사탐3-2S 월목","사탐3-6T 수목","사탐3-9R 화수"
-];
+const SUBJECTS = {
+  경제: { classes: ["경제2-4 월화금","경제2-5 화목금"] },
+  정치: { classes: ["정치"] },
+  사탐: { classes: ["사탐3-2S 월목","사탐3-6T 수목","사탐3-9R 화수"] }
+};
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
-const stateRef = doc(db, 'jindo', 'state');
+const stateRef = doc(db, 'jindo', 'state2');
 
-let state = { cellData:{}, numSeq:10, topics:{} };
+let state = {
+  subjects: {
+    경제:{cellData:{},numSeq:10,topics:{}},
+    정치:{cellData:{},numSeq:10,topics:{}},
+    사탐:{cellData:{},numSeq:10,topics:{}}
+  }
+};
+let currentSubject = '경제';
 let editingKey = null;
+let ctxTargetIdx = null;
 
 const badge = document.getElementById('sync-badge');
+const ctxMenu = document.getElementById('ctx-menu');
 
 function setSyncBadge(s) {
   if(s==='ok'){badge.textContent='동기화됨';badge.style.background='#eafaf1';badge.style.color='#1a7c4a';}
@@ -92,63 +129,151 @@ function setSyncBadge(s) {
 async function persist() {
   setSyncBadge('saving');
   try {
-    await setDoc(stateRef, { cellData: state.cellData, numSeq: state.numSeq, topics: state.topics, updatedAt: new Date() });
+    await setDoc(stateRef, { subjects: state.subjects, updatedAt: new Date() });
   } catch(e){ setSyncBadge('error'); }
 }
 
 onSnapshot(stateRef, snap => {
   if(snap.exists()) {
     const d = snap.data();
-    state.cellData = d.cellData || {};
-    state.numSeq = d.numSeq || 10;
-    state.topics = d.topics || {};
+    if(d.subjects) {
+      ['경제','정치','사탐'].forEach(s => {
+        if(d.subjects[s]) state.subjects[s] = d.subjects[s];
+      });
+    }
   }
   setSyncBadge('ok');
   render();
 }, () => setSyncBadge('error'));
 
+function ss() { return state.subjects[currentSubject]; }
 function cellKey(cls, idx){ return cls+'||'+idx; }
 
+// 열 삽입: idx 위치에 빈 열 삽입, 기존 데이터 오른쪽으로 밀기
+function insertCol(idx) {
+  const s = ss();
+  const classes = SUBJECTS[currentSubject].classes;
+  // topics 밀기
+  for(let i=s.numSeq;i>idx;i--) {
+    s.topics[i] = s.topics[i-1]||'';
+  }
+  s.topics[idx] = '';
+  // cellData 밀기
+  const newCellData = {};
+  Object.keys(s.cellData).forEach(k => {
+    const [cls, idxStr] = k.split('||');
+    const i = parseInt(idxStr);
+    if(i >= idx) newCellData[cls+'||'+(i+1)] = s.cellData[k];
+    else newCellData[k] = s.cellData[k];
+  });
+  s.cellData = newCellData;
+  s.numSeq++;
+}
+
+// 열 삭제: idx 위치 삭제, 데이터 왼쪽으로 당기기
+function deleteCol(idx) {
+  const s = ss();
+  // topics 당기기
+  for(let i=idx;i<s.numSeq-1;i++) {
+    s.topics[i] = s.topics[i+1]||'';
+  }
+  delete s.topics[s.numSeq-1];
+  // cellData 당기기
+  const newCellData = {};
+  Object.keys(s.cellData).forEach(k => {
+    const parts = k.split('||');
+    const cls = parts[0];
+    const i = parseInt(parts[1]);
+    if(i === idx) return;
+    if(i > idx) newCellData[cls+'||'+(i-1)] = s.cellData[k];
+    else newCellData[k] = s.cellData[k];
+  });
+  s.cellData = newCellData;
+  s.numSeq--;
+}
+
+// 열 이동: idx ↔ idx+dir
+function moveCol(idx, dir) {
+  const target = idx + dir;
+  const s = ss();
+  if(target < 0 || target >= s.numSeq) return;
+  // swap topics
+  const tmp = s.topics[idx]||'';
+  s.topics[idx] = s.topics[target]||'';
+  s.topics[target] = tmp;
+  // swap cellData
+  const classes = SUBJECTS[currentSubject].classes;
+  classes.forEach(cls => {
+    const ka = cellKey(cls, idx);
+    const kb = cellKey(cls, target);
+    const tmp = s.cellData[ka];
+    if(s.cellData[kb]) s.cellData[ka] = s.cellData[kb];
+    else delete s.cellData[ka];
+    if(tmp) s.cellData[kb] = tmp;
+    else delete s.cellData[kb];
+  });
+}
+
+function hideCtx() { ctxMenu.style.display='none'; ctxTargetIdx=null; }
+
+document.addEventListener('click', hideCtx);
+document.addEventListener('keydown', e => { if(e.key==='Escape') hideCtx(); });
+
+document.getElementById('ctx-insert-before').onclick = e => {
+  e.stopPropagation();
+  if(ctxTargetIdx===null) return;
+  insertCol(ctxTargetIdx); hideCtx(); persist(); render();
+};
+document.getElementById('ctx-insert-after').onclick = e => {
+  e.stopPropagation();
+  if(ctxTargetIdx===null) return;
+  insertCol(ctxTargetIdx+1); hideCtx(); persist(); render();
+};
+document.getElementById('ctx-move-left').onclick = e => {
+  e.stopPropagation();
+  if(ctxTargetIdx===null) return;
+  moveCol(ctxTargetIdx,-1); hideCtx(); persist(); render();
+};
+document.getElementById('ctx-move-right').onclick = e => {
+  e.stopPropagation();
+  if(ctxTargetIdx===null) return;
+  moveCol(ctxTargetIdx,1); hideCtx(); persist(); render();
+};
+document.getElementById('ctx-delete').onclick = e => {
+  e.stopPropagation();
+  if(ctxTargetIdx===null) return;
+  if(ss().numSeq<=1) return;
+  deleteCol(ctxTargetIdx); hideCtx(); persist(); render();
+};
+
 function render() {
+  const s = ss();
+  const classes = SUBJECTS[currentSubject].classes;
   const tbl = document.getElementById('tbl');
+
   let html = '<thead><tr><th style="min-width:120px;text-align:left;vertical-align:middle">반</th>';
-  for(let i=0;i<state.numSeq;i++){
-    const t = (state.topics[i]||'').replace(/"/g,'&quot;');
-    html += `<th class="topic-input-cell"><span class="seq-label">${i+1}차시</span><input type="text" placeholder="주제" value="${t}" data-seq="${i}"/></th>`;
+  for(let i=0;i<s.numSeq;i++){
+    const t = (s.topics[i]||'').replace(/"/g,'&quot;');
+    html += `<th class="topic-input-cell" data-col="${i}"><span class="seq-label">${i+1}차시</span><input type="text" placeholder="주제" value="${t}" data-seq="${i}"/></th>`;
   }
   html += '</tr></thead><tbody>';
-  CLASSES.forEach(cls => {
+
+  classes.forEach(cls => {
     html += `<tr><td class="class-name">${cls}</td>`;
-    for(let i=0;i<state.numSeq;i++){
+    for(let i=0;i<s.numSeq;i++){
       const k = cellKey(cls,i);
-      const d = state.cellData[k]||{};
+      const d = s.cellData[k]||{};
       let tdCls='cell';
       if(d.done) tdCls+=' done';
       if(d.perf) tdCls+=' perf';
       if(!d.date&&!d.done&&!d.perf) tdCls+=' cell-empty';
-      const dateVal = (d.date||'').replace(/"/g,'&quot;');
-      const blueCls = 'cbtn cbtn-blue'+(d.done?' active':'');
-      const yelCls  = 'cbtn cbtn-yellow'+(d.perf?' active':'');
+      const dateVal=(d.date||'').replace(/"/g,'&quot;');
+      const blueCls='cbtn cbtn-blue'+(d.done?' active':'');
+      const yelCls='cbtn cbtn-yellow'+(d.perf?' active':'');
       if(editingKey===k){
-        html += `<td class="${tdCls}" data-key="${k}">
-          <div class="cell-input-wrap">
-            <input class="cell-inline-input" type="text" value="${dateVal}" placeholder="6/9" maxlength="10" data-key="${k}"/>
-            <div class="cell-btns">
-              <div class="${blueCls}" data-key="${k}" data-type="done"></div>
-              <div class="${yelCls}" data-key="${k}" data-type="perf"></div>
-            </div>
-          </div>
-        </td>`;
+        html+=`<td class="${tdCls}" data-key="${k}"><div class="cell-input-wrap"><input class="cell-inline-input" type="text" value="${dateVal}" placeholder="6/9" maxlength="10" data-key="${k}"/><div class="cell-btns"><div class="${blueCls}" data-key="${k}" data-type="done"></div><div class="${yelCls}" data-key="${k}" data-type="perf"></div></div></div></td>`;
       } else {
-        html += `<td class="${tdCls}" data-key="${k}">
-          <div class="cell-inner">
-            <span class="cell-date">${d.date||'—'}</span>
-            <div class="cell-btns">
-              <div class="${blueCls}" data-key="${k}" data-type="done"></div>
-              <div class="${yelCls}" data-key="${k}" data-type="perf"></div>
-            </div>
-          </div>
-        </td>`;
+        html+=`<td class="${tdCls}" data-key="${k}"><div class="cell-inner"><span class="cell-date">${d.date||'—'}</span><div class="cell-btns"><div class="${blueCls}" data-key="${k}" data-type="done"></div><div class="${yelCls}" data-key="${k}" data-type="perf"></div></div></div></td>`;
       }
     }
     html += '</tr>';
@@ -156,16 +281,36 @@ function render() {
   html += '</tbody>';
   tbl.innerHTML = html;
 
+  // 차시 헤더 우클릭
+  tbl.querySelectorAll('th.topic-input-cell').forEach(th => {
+    th.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      ctxTargetIdx = parseInt(th.dataset.col);
+      const s = ss();
+      document.getElementById('ctx-move-left').style.opacity = ctxTargetIdx===0?'0.4':'1';
+      document.getElementById('ctx-move-left').style.pointerEvents = ctxTargetIdx===0?'none':'auto';
+      document.getElementById('ctx-move-right').style.opacity = ctxTargetIdx===s.numSeq-1?'0.4':'1';
+      document.getElementById('ctx-move-right').style.pointerEvents = ctxTargetIdx===s.numSeq-1?'none':'auto';
+      document.getElementById('ctx-delete').style.opacity = s.numSeq<=1?'0.4':'1';
+      document.getElementById('ctx-delete').style.pointerEvents = s.numSeq<=1?'none':'auto';
+      ctxMenu.style.display='block';
+      const x = Math.min(e.clientX, window.innerWidth-170);
+      const y = Math.min(e.clientY, window.innerHeight-200);
+      ctxMenu.style.left=x+'px';
+      ctxMenu.style.top=y+'px';
+    });
+  });
+
   tbl.querySelectorAll('td.cell').forEach(td => {
     td.addEventListener('click', e => {
       if(e.target.classList.contains('cbtn')||e.target.classList.contains('cell-inline-input')) return;
-      const k = td.dataset.key;
+      const k=td.dataset.key;
       if(editingKey===k) return;
-      editingKey = k;
-      render();
+      editingKey=k; render();
       setTimeout(()=>{
-        const inp = tbl.querySelector(`.cell-inline-input[data-key="${CSS.escape(k)}"]`);
-        if(inp){ inp.focus(); inp.select(); }
+        const inp=tbl.querySelector(`.cell-inline-input[data-key="${k}"]`);
+        if(inp){inp.focus();inp.select();}
       },30);
     });
   });
@@ -173,50 +318,53 @@ function render() {
   tbl.querySelectorAll('.cell-inline-input').forEach(inp => {
     inp.addEventListener('keydown', e => {
       if(e.key==='Enter'){
-        const k = inp.dataset.key;
-        if(!state.cellData[k]) state.cellData[k]={};
-        state.cellData[k].date = inp.value.trim();
-        editingKey = null;
-        persist(); render();
+        const k=inp.dataset.key;
+        if(!ss().cellData[k]) ss().cellData[k]={};
+        ss().cellData[k].date=inp.value.trim();
+        editingKey=null; persist(); render();
       }
-      if(e.key==='Escape'){ editingKey=null; render(); }
+      if(e.key==='Escape'){editingKey=null;render();}
       e.stopPropagation();
     });
-    inp.addEventListener('blur', () => {
+    inp.addEventListener('blur',()=>{
       setTimeout(()=>{
         if(editingKey===inp.dataset.key){
-          const k = inp.dataset.key;
-          if(!state.cellData[k]) state.cellData[k]={};
-          state.cellData[k].date = inp.value.trim();
+          const k=inp.dataset.key;
+          if(!ss().cellData[k]) ss().cellData[k]={};
+          ss().cellData[k].date=inp.value.trim();
           editingKey=null; persist(); render();
         }
       },150);
     });
-    inp.addEventListener('click', e => e.stopPropagation());
+    inp.addEventListener('click',e=>e.stopPropagation());
   });
 
   tbl.querySelectorAll('.cbtn').forEach(btn => {
-    btn.addEventListener('click', e => {
+    btn.addEventListener('click',e=>{
       e.stopPropagation();
-      const k = btn.dataset.key;
-      const type = btn.dataset.type;
-      if(!state.cellData[k]) state.cellData[k]={};
-      state.cellData[k][type] = !state.cellData[k][type];
+      const k=btn.dataset.key, type=btn.dataset.type;
+      if(!ss().cellData[k]) ss().cellData[k]={};
+      ss().cellData[k][type]=!ss().cellData[k][type];
       persist(); render();
     });
   });
 
   tbl.querySelectorAll('input[data-seq]').forEach(inp => {
-    inp.addEventListener('change', () => { state.topics[inp.dataset.seq]=inp.value; persist(); });
-    inp.addEventListener('click', e => e.stopPropagation());
+    inp.addEventListener('change',()=>{ss().topics[inp.dataset.seq]=inp.value;persist();});
+    inp.addEventListener('click',e=>e.stopPropagation());
   });
 }
 
-document.getElementById('btn-add').onclick = () => { state.numSeq++; persist(); render(); };
-document.getElementById('btn-remove').onclick = () => {
-  if(state.numSeq<=1) return;
-  state.numSeq--; persist(); render();
-};
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentSubject=tab.dataset.subject;
+    editingKey=null; render();
+  });
+});
+
+document.getElementById('btn-add').onclick=()=>{ss().numSeq++;persist();render();};
 </script>
 </body>
 </html>
