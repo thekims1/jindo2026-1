@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>진도계획표</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;padding:1.5rem;color:#1a1a1a}
+h1{font-size:18px;font-weight:500;margin-bottom:1rem;color:#1a1a1a}
+.top-bar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.top-bar button{font-size:13px;padding:4px 14px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer;height:32px}
+.top-bar button:hover{background:#f0f0ee}
+.legend{display:flex;gap:12px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
+.legend-dot{width:14px;height:14px;border-radius:3px}
+.tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:0.5px solid #ddd;padding:1rem}
+table{border-collapse:collapse;font-size:13px}
+th,td{border:0.5px solid #ddd;padding:6px 8px;white-space:nowrap}
+th{background:#f5f5f3;color:#666;font-weight:500;text-align:center;vertical-align:top}
+th.topic-input-cell{padding:4px}
+th.topic-input-cell input{width:72px;font-size:11px;padding:3px 5px;border:0.5px solid #ddd;border-radius:4px;background:#fff;color:#1a1a1a;text-align:center}
+th.seq-label{font-size:12px;font-weight:500;display:block;margin-bottom:3px}
+td.class-name{background:#f5f5f3;font-weight:500;color:#1a1a1a;text-align:left;min-width:120px;font-size:12px}
+td.cell{text-align:center;cursor:pointer;min-width:72px;color:#1a1a1a;font-size:12px}
+td.cell:hover{filter:brightness(0.95)}
+td.done{background:#B5D4F4;color:#0C447C}
+td.perf{background:#FAC775;color:#633806}
+td.done.perf{background:linear-gradient(135deg,#B5D4F4 50%,#FAC775 50%)}
+td.empty{color:#bbb}
+.modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border:0.5px solid #ccc;border-radius:12px;padding:1.25rem;width:260px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+.modal h3{font-size:14px;font-weight:500;margin-bottom:12px}
+.modal label{font-size:12px;color:#666;display:block;margin-bottom:4px}
+.modal input[type=text]{width:100%;font-size:13px;padding:6px 8px;border:0.5px solid #ccc;border-radius:8px;margin-bottom:10px}
+.modal-checks{display:flex;gap:12px;margin-bottom:12px}
+.modal-checks label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;font-weight:400}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.modal-btns button{font-size:13px;padding:5px 14px;border:0.5px solid #ccc;border-radius:8px;background:#fff;cursor:pointer}
+.modal-btns button.primary{background:#e8f0fb;color:#1a5fb4;border-color:transparent}
+.modal-btns button:hover{background:#f0f0ee}
+.modal-btns button.primary:hover{filter:brightness(0.95)}
+</style>
+</head>
+<body>
+<h1>진도계획표</h1>
+<div class="top-bar">
+  <button id="btn-add">+ 차시 추가</button>
+  <button id="btn-remove">− 마지막 차시 삭제</button>
+</div>
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#B5D4F4;border:0.5px solid #85B7EB"></div>수업 완료</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FAC775;border:0.5px solid #EF9F27"></div>수행평가</div>
+  <div class="legend-item" style="font-size:12px;color:#aaa">셀 클릭 → 날짜·상태 입력</div>
+</div>
+<div class="tbl-wrap"><table id="tbl"></table></div>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">날짜 입력</h3>
+    <label>날짜 (예: 6/9)</label>
+    <input type="text" id="modal-date" placeholder="6/9" maxlength="10"/>
+    <div class="modal-checks">
+      <label><input type="checkbox" id="chk-done"> 수업 완료</label>
+      <label><input type="checkbox" id="chk-perf"> 수행평가</label>
+    </div>
+    <div class="modal-btns">
+      <button id="btn-clear">초기화</button>
+      <button id="btn-cancel">취소</button>
+      <button class="primary" id="btn-save">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CLASSES = [
+  "경제2-4 월화금",
+  "경제2-5 화목금",
+  "정치",
+  "사탐3-2S 월목",
+  "사탐3-6T 수목",
+  "사탐3-9R 화수"
+];
+
+const KEY_DATA = 'jindo_cells_v2';
+const KEY_SEQ = 'jindo_seq_v2';
+const KEY_TOPICS = 'jindo_topics_v2';
+
+let cellData = {};
+let numSeq = 10;
+let topics = {};
+
+try { cellData = JSON.parse(localStorage.getItem(KEY_DATA)) || {}; } catch(e){}
+try { numSeq = parseInt(localStorage.getItem(KEY_SEQ)) || 10; } catch(e){}
+try { topics = JSON.parse(localStorage.getItem(KEY_TOPICS)) || {}; } catch(e){}
+
+function persist() {
+  try {
+    localStorage.setItem(KEY_DATA, JSON.stringify(cellData));
+    localStorage.setItem(KEY_SEQ, String(numSeq));
+    localStorage.setItem(KEY_TOPICS, JSON.stringify(topics));
+  } catch(e){}
+}
+
+function cellKey(cls, idx) { return cls + '||' + idx; }
+
+let editing = null;
+
+function render() {
+  const tbl = document.getElementById('tbl');
+  let html = '<thead><tr><th style="min-width:120px;text-align:left;vertical-align:middle">반</th>';
+  for (let i = 0; i < numSeq; i++) {
+    html += `<th class="topic-input-cell"><span class="seq-label">${i+1}차시</span><input type="text" placeholder="주제" value="${topics[i]||''}" data-seq="${i}" /></th>`;
+  }
+  html += '</tr></thead><tbody>';
+  CLASSES.forEach(cls => {
+    html += `<tr><td class="class-name">${cls}</td>`;
+    for (let i = 0; i < numSeq; i++) {
+      const k = cellKey(cls, i);
+      const d = cellData[k] || {};
+      let cls2 = 'cell';
+      if (d.done) cls2 += ' done';
+      if (d.perf) cls2 += ' perf';
+      if (!d.date && !d.done && !d.perf) cls2 += ' empty';
+      html += `<td class="${cls2}" data-key="${k}" data-cls="${cls}" data-idx="${i}">${d.date || '—'}</td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+
+  tbl.querySelectorAll('td.cell').forEach(td => {
+    td.addEventListener('click', () => openModal(td.dataset.cls, parseInt(td.dataset.idx), td.dataset.key));
+  });
+  tbl.querySelectorAll('input[data-seq]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      topics[inp.dataset.seq] = inp.value;
+      persist();
+    });
+    inp.addEventListener('click', e => e.stopPropagation());
+  });
+}
+
+function openModal(cls, idx, key) {
+  editing = key;
+  const d = cellData[key] || {};
+  document.getElementById('modal-title').textContent = `${cls} · ${idx+1}차시`;
+  document.getElementById('modal-date').value = d.date || '';
+  document.getElementById('chk-done').checked = !!d.done;
+  document.getElementById('chk-perf').checked = !!d.perf;
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => document.getElementById('modal-date').focus(), 50);
+}
+
+document.getElementById('btn-save').onclick = () => {
+  if (!editing) return;
+  cellData[editing] = {
+    date: document.getElementById('modal-date').value.trim(),
+    done: document.getElementById('chk-done').checked,
+    perf: document.getElementById('chk-perf').checked,
+  };
+  persist(); render();
+  document.getElementById('modal').classList.remove('open');
+  editing = null;
+};
+document.getElementById('btn-cancel').onclick = () => {
+  document.getElementById('modal').classList.remove('open');
+  editing = null;
+};
+document.getElementById('btn-clear').onclick = () => {
+  if (!editing) return;
+  delete cellData[editing];
+  persist(); render();
+  document.getElementById('modal').classList.remove('open');
+  editing = null;
+};
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+    editing = null;
+  }
+});
+document.getElementById('btn-add').onclick = () => { numSeq++; persist(); render(); };
+document.getElementById('btn-remove').onclick = () => {
+  if (numSeq <= 1) return;
+  numSeq--;
+  persist(); render();
+};
+
+render();
+</script>
+</body>
+</html>
